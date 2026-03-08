@@ -53,7 +53,10 @@
 <body>
   <div class="header">
     <h1>Nepal Election Party Votes</h1>
-    <div>Updated: {{ updated_at }} | Cache TTL: {{ ttl_minutes }} min</div>
+    <div>
+      Updated: {{ updated_at }} | Cache TTL: {{ ttl_minutes }} min |
+      Total Votes: {{ '{:,.0f}'.format(total_votes) }}
+    </div>
   </div>
 
   <div class="card actions">
@@ -75,6 +78,7 @@
         <tr>
           <th>PoliticalPartyName</th>
           <th>TotalVoteReceived</th>
+          <th>Percentage</th>
         </tr>
       </thead>
       <tbody>
@@ -82,6 +86,7 @@
         <tr>
           <td>{{ row.PoliticalPartyName }}</td>
           <td>{{ '{:,.0f}'.format(row.TotalVoteReceived) }}</td>
+          <td>{{ '{:.2f}%'.format(row.Percentage) }}</td>
         </tr>
         {% endfor %}
       </tbody>

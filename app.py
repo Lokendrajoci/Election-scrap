@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 from flask import Flask, jsonify, make_response, render_template
 
-from processing import process_party_votes, to_csv_bytes, to_excel_bytes
+from processing import TOTAL_VOTES, process_party_votes, to_csv_bytes, to_excel_bytes
 from scraper import fetch_raw_records
 
 app = Flask(__name__)
@@ -36,6 +36,7 @@ def home():
         "index.html",
         updated_at=datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC"),
         ttl_minutes=CACHE_TTL_SECONDS // 60,
+        total_votes=TOTAL_VOTES,
         rows=df.to_dict(orient="records"),
         chart_labels=top10["PoliticalPartyName"].tolist(),
         chart_values=top10["TotalVoteReceived"].tolist(),
