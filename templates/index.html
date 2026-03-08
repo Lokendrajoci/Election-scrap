@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nepal Election Party Votes</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Segoe UI, Tahoma, sans-serif;
+      margin: 24px;
+      background: #f7f7f7;
+      color: #222;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid #e2e2e2;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .actions a {
+      margin-right: 10px;
+      text-decoration: none;
+      color: #0a5;
+      font-weight: 600;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    th, td {
+      border-bottom: 1px solid #eee;
+      text-align: left;
+      padding: 10px;
+    }
+    th {
+      background: #fafafa;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Nepal Election Party Votes</h1>
+    <div>Updated: {{ updated_at }} | Cache TTL: {{ ttl_minutes }} min</div>
+  </div>
+
+  <div class="card actions">
+    <a href="/api/v1/votes" target="_blank">View JSON API</a>
+    <a href="/api/v1/votes/refresh" target="_blank">Force Refresh API</a>
+    <a href="/download/csv">Download CSV</a>
+    <a href="/download/excel">Download Excel</a>
+  </div>
+
+  <div class="card">
+    <h2>Top 10 Parties by TotalVoteReceived</h2>
+    <canvas id="votesChart"></canvas>
+  </div>
+
+  <div class="card">
+    <h2>All Parties</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>PoliticalPartyName</th>
+          <th>TotalVoteReceived</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          <td>{{ row.PoliticalPartyName }}</td>
+          <td>{{ '{:,.0f}'.format(row.TotalVoteReceived) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    const labels = {{ chart_labels | tojson }};
+    const values = {{ chart_values | tojson }};
+
+    new Chart(document.getElementById('votesChart'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Total Votes',
+          data: values,
+          backgroundColor: '#ff7f7f'
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: { ticks: { maxRotation: 45, minRotation: 30 } }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
