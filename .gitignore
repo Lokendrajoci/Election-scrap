@@ -1,0 +1,24 @@
+# Virtual Environment
+venv/
+
+# Output Files
+*.csv
+*.xlsx
+~$*.xlsx
+
+# Debug Files
+page.html
+election_data.txt
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
