@@ -37,3 +37,17 @@ def fetch_raw_records(timeout: int = 30) -> List[Dict[str, Any]]:
     response.raise_for_status()
 
     return json.loads(response.text)
+
+
+def fetch_total_votes(records: List[Dict[str, Any]] = None, timeout: int = 30) -> int:
+    """Calculate total votes from the election records (sum of all parties)."""
+    if records is None:
+        records = fetch_raw_records(timeout=timeout)
+    
+    total = 0
+    for record in records:
+        votes = record.get("TotalVoteReceived", 0)
+        if votes:
+            total += int(float(votes))
+    
+    return total

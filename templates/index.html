@@ -6,91 +6,209 @@
   <title>Nepal Election Party Votes</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
+    * {
+      box-sizing: border-box;
+    }
     body {
       font-family: Segoe UI, Tahoma, sans-serif;
-      margin: 24px;
+      margin: 0;
+      padding: 16px;
       background: #f7f7f7;
       color: #222;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
     }
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 16px;
-      gap: 10px;
+      margin-bottom: 20px;
+      gap: 16px;
       flex-wrap: wrap;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+    .header-info {
+      font-size: 0.9rem;
+      color: #666;
     }
     .card {
       background: #fff;
       border: 1px solid #e2e2e2;
       border-radius: 10px;
-      padding: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .card h2 {
+      margin-top: 0;
       margin-bottom: 16px;
+      font-size: 1.4rem;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
     }
     .actions a {
-      margin-right: 10px;
       text-decoration: none;
-      color: #0a5;
+      color: #fff;
+      background: #0a5;
+      padding: 10px 16px;
+      border-radius: 6px;
       font-weight: 600;
+      transition: background 0.2s;
+      display: inline-block;
+    }
+    .actions a:hover {
+      background: #085;
+    }
+    .table-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
     }
     table {
       width: 100%;
       border-collapse: collapse;
       background: #fff;
-      border-radius: 10px;
-      overflow: hidden;
+      min-width: 500px;
     }
     th, td {
       border-bottom: 1px solid #eee;
       text-align: left;
-      padding: 10px;
+      padding: 12px;
     }
     th {
       background: #fafafa;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    tr:hover {
+      background: #f9f9f9;
+    }
+    .chart-container {
+      position: relative;
+      height: 400px;
+      width: 100%;
+    }
+    
+    /* Mobile Responsive Styles */
+    @media (max-width: 768px) {
+      body {
+        padding: 12px;
+      }
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      .header h1 {
+        font-size: 1.5rem;
+      }
+      .header-info {
+        font-size: 0.85rem;
+      }
+      .card {
+        padding: 16px;
+      }
+      .card h2 {
+        font-size: 1.2rem;
+      }
+      .actions {
+        flex-direction: column;
+      }
+      .actions a {
+        text-align: center;
+        width: 100%;
+      }
+      .chart-container {
+        height: 300px;
+      }
+      th, td {
+        padding: 8px;
+        font-size: 0.9rem;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .header h1 {
+        font-size: 1.3rem;
+      }
+      .header-info {
+        font-size: 0.8rem;
+      }
+      .card {
+        padding: 12px;
+        margin-bottom: 16px;
+      }
+      .card h2 {
+        font-size: 1.1rem;
+      }
+      th, td {
+        padding: 6px;
+        font-size: 0.85rem;
+      }
+      .chart-container {
+        height: 250px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    <h1>Nepal Election Party Votes</h1>
-    <div>
-      Updated: {{ updated_at }} | Cache TTL: {{ ttl_minutes }} min |
-      Total Votes: {{ '{:,.0f}'.format(total_votes) }}
+  <div class="container">
+    <div class="header">
+      <h1>Nepal Election Party Votes</h1>
+      <div class="header-info">
+        Updated: {{ updated_at }}<br>
+        Cache TTL: {{ ttl_minutes }} min | Total Votes: {{ '{:,.0f}'.format(total_votes) }}
+      </div>
     </div>
-  </div>
 
-  <div class="card actions">
-    <a href="/api/v1/votes" target="_blank">View JSON API</a>
-    <a href="/api/v1/votes/refresh" target="_blank">Force Refresh API</a>
-    <a href="/download/csv">Download CSV</a>
-    <a href="/download/excel">Download Excel</a>
-  </div>
+    <div class="card">
+      <div class="actions">
+        <a href="/api/v1/votes" target="_blank">📊 View JSON API</a>
+        <a href="/api/v1/votes/refresh" target="_blank">🔄 Force Refresh</a>
+        <a href="/download/csv">📥 Download CSV</a>
+        <a href="/download/excel">📥 Download Excel</a>
+      </div>
+    </div>
 
-  <div class="card">
-    <h2>Top 10 Parties by TotalVoteReceived</h2>
-    <canvas id="votesChart"></canvas>
-  </div>
+    <div class="card">
+      <h2>Top 10 Parties by Total Votes</h2>
+      <div class="chart-container">
+        <canvas id="votesChart"></canvas>
+      </div>
+    </div>
 
-  <div class="card">
-    <h2>All Parties</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>PoliticalPartyName</th>
-          <th>TotalVoteReceived</th>
-          <th>Percentage</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for row in rows %}
-        <tr>
-          <td>{{ row.PoliticalPartyName }}</td>
-          <td>{{ '{:,.0f}'.format(row.TotalVoteReceived) }}</td>
-          <td>{{ '{:.2f}%'.format(row.Percentage) }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    <div class="card">
+      <h2>All Parties</h2>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Political Party Name</th>
+              <th>Total Votes</th>
+              <th>Percentage</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in rows %}
+            <tr>
+              <td>{{ row.PoliticalPartyName }}</td>
+              <td>{{ '{:,.0f}'.format(row.TotalVoteReceived) }}</td>
+              <td>{{ '{:.2f}%'.format(row.Percentage) }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -104,16 +222,41 @@
         datasets: [{
           label: 'Total Votes',
           data: values,
-          backgroundColor: '#ff7f7f'
+          backgroundColor: '#0a5',
+          borderRadius: 6
         }]
       },
       options: {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
-          legend: { display: false }
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return 'Votes: ' + context.parsed.y.toLocaleString();
+              }
+            }
+          }
         },
         scales: {
-          x: { ticks: { maxRotation: 45, minRotation: 30 } }
+          x: { 
+            ticks: { 
+              maxRotation: 45, 
+              minRotation: 30,
+              autoSkip: false,
+              font: {
+                size: window.innerWidth < 480 ? 10 : 12
+              }
+            } 
+          },
+          y: {
+            ticks: {
+              callback: function(value) {
+                return value.toLocaleString();
+              }
+            }
+          }
         }
       }
     });
